@@ -17,6 +17,7 @@ import {
   Plus,
   Settings
 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Reminder {
   id: string;
@@ -32,6 +33,7 @@ interface Reminder {
 }
 
 const WellnessReminders = () => {
+  const { t } = useLanguage();
   const [reminders, setReminders] = useState<Reminder[]>([
     {
       id: "1",
@@ -207,15 +209,15 @@ const WellnessReminders = () => {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => completeReminder(reminder.id)}
-                          className="gap-1"
-                        >
-                          <CheckCircle className="h-3 w-3" />
-                          Done
-                        </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => completeReminder(reminder.id)}
+                            className="gap-1"
+                          >
+                            <CheckCircle className="h-3 w-3" />
+                            {t('reminders.done')}
+                          </Button>
                         <Switch
                           checked={reminder.isEnabled}
                           onCheckedChange={() => toggleReminder(reminder.id)}

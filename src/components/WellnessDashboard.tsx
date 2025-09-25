@@ -15,13 +15,16 @@ import {
   Sun,
   Activity
 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 import ChatAssistant from "./ChatAssistant";
 import MoodTracker from "./MoodTracker";
 import WellnessReminders from "./WellnessReminders";
 import EmergencyAlert from "./EmergencyAlert";
+import LanguageSelector from "./LanguageSelector";
 
 const WellnessDashboard = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
+  const { t } = useLanguage();
   
   // Sample data for the wellness dashboard
   const wellnessScore = 78;
@@ -199,17 +202,17 @@ const WellnessDashboard = () => {
             <div className="flex items-center gap-2">
               <Brain className="h-8 w-8 text-primary" />
               <h1 className="text-xl font-bold bg-gradient-wellness bg-clip-text text-transparent">
-                Well-Wisher AI
+                {t('app.title')}
               </h1>
             </div>
             
             <nav className="flex gap-1">
               {[
-                { id: "dashboard", label: "Dashboard", icon: Activity },
-                { id: "chat", label: "AI Chat", icon: MessageCircle },
-                { id: "mood", label: "Mood", icon: Heart },
-                { id: "reminders", label: "Reminders", icon: Calendar },
-                { id: "emergency", label: "Emergency", icon: AlertTriangle }
+                { id: "dashboard", label: t('dashboard.title'), icon: Activity },
+                { id: "chat", label: t('chat.title'), icon: MessageCircle },
+                { id: "mood", label: t('mood.title'), icon: Heart },
+                { id: "reminders", label: t('reminders.title'), icon: Calendar },
+                { id: "emergency", label: t('emergency.title'), icon: AlertTriangle }
               ].map((tab) => {
                 const IconComponent = tab.icon;
                 return (
@@ -232,6 +235,13 @@ const WellnessDashboard = () => {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {activeTab === "dashboard" && (
+          <div className="mb-6 flex justify-end">
+            <div className="w-72">
+              <LanguageSelector />
+            </div>
+          </div>
+        )}
         {renderActiveTab()}
       </main>
     </div>

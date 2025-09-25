@@ -19,6 +19,7 @@ import {
   TrendingUp,
   BarChart3
 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface MoodEntry {
   id: string;
@@ -32,6 +33,7 @@ interface MoodEntry {
 }
 
 const MoodTracker = () => {
+  const { t } = useLanguage();
   const [selectedMood, setSelectedMood] = useState<string>("");
   const [energy, setEnergy] = useState(50);
   const [stress, setStress] = useState(50);
@@ -41,11 +43,11 @@ const MoodTracker = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
   const moods = [
-    { id: "excellent", label: "Excellent", icon: Sun, color: "bg-wellness-joy", emoji: "😊" },
-    { id: "good", label: "Good", icon: Smile, color: "bg-wellness-energy", emoji: "🙂" },
-    { id: "neutral", label: "Neutral", icon: Meh, color: "bg-wellness-calm", emoji: "😐" },
-    { id: "poor", label: "Poor", icon: Cloud, color: "bg-muted", emoji: "😞" },
-    { id: "terrible", label: "Terrible", icon: CloudRain, color: "bg-destructive", emoji: "😢" }
+    { id: "excellent", label: t('mood.excellent'), icon: Sun, color: "bg-wellness-joy", emoji: "😊" },
+    { id: "good", label: t('mood.good'), icon: Smile, color: "bg-wellness-energy", emoji: "🙂" },
+    { id: "neutral", label: t('mood.okay'), icon: Meh, color: "bg-wellness-calm", emoji: "😐" },
+    { id: "poor", label: t('mood.bad'), icon: Cloud, color: "bg-muted", emoji: "😞" },
+    { id: "terrible", label: t('mood.terrible'), icon: CloudRain, color: "bg-destructive", emoji: "😢" }
   ];
 
   const moodFactors = [
@@ -104,7 +106,7 @@ const MoodTracker = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Heart className="h-5 w-5 text-primary" />
-              How are you feeling today?
+              {t('mood.current')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -141,7 +143,7 @@ const MoodTracker = () => {
             <div className="space-y-4">
               <div>
                 <div className="flex justify-between mb-2">
-                  <span className="text-sm font-medium">Energy Level</span>
+                  <span className="text-sm font-medium">{t('mood.energy')}</span>
                   <span className="text-sm text-muted-foreground">{energy}%</span>
                 </div>
                 <Progress value={energy} className="h-2" />
@@ -157,7 +159,7 @@ const MoodTracker = () => {
 
               <div>
                 <div className="flex justify-between mb-2">
-                  <span className="text-sm font-medium">Stress Level</span>
+                  <span className="text-sm font-medium">{t('mood.stress')}</span>
                   <span className="text-sm text-muted-foreground">{stress}%</span>
                 </div>
                 <Progress value={stress} className="h-2" />
@@ -223,7 +225,7 @@ const MoodTracker = () => {
           </CardHeader>
           <CardContent>
             <Textarea
-              placeholder="How was your day? Any thoughts or reflections you'd like to record?"
+              placeholder={t('mood.note')}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               className="min-h-[100px]"
@@ -237,7 +239,7 @@ const MoodTracker = () => {
           className="w-full bg-gradient-wellness"
           size="lg"
         >
-          Save Mood Entry
+          {t('mood.save')}
         </Button>
       </div>
 

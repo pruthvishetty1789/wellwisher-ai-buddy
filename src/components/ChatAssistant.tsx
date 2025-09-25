@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, Bot, User, Heart, Lightbulb, Smile } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Message {
   id: string;
@@ -15,10 +16,11 @@ interface Message {
 }
 
 const ChatAssistant = () => {
+  const { t } = useLanguage();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
-      content: "Hello! I'm your Well-Wisher AI assistant. I'm here to provide emotional support and help with your mental wellness. How are you feeling today?",
+      content: t('chat.initial'),
       isUser: false,
       timestamp: new Date(),
       mood: "supportive"
@@ -129,11 +131,11 @@ const ChatAssistant = () => {
   };
 
   const quickPrompts = [
-    "I'm feeling anxious about exams",
-    "I had a great day today!",
-    "I'm struggling with sleep",
-    "Need motivation to study",
-    "Feeling overwhelmed lately"
+    t('chat.prompt.anxious'),
+    t('chat.prompt.great'),
+    t('chat.prompt.sleep'),
+    t('chat.prompt.motivation'),
+    t('chat.prompt.overwhelmed')
   ];
 
   return (
@@ -142,9 +144,9 @@ const ChatAssistant = () => {
         <CardHeader className="bg-gradient-wellness text-primary-foreground">
           <CardTitle className="flex items-center gap-2">
             <Bot className="h-6 w-6" />
-            AI Mental Wellness Assistant
+            {t('chat.title')}
             <Badge variant="secondary" className="ml-auto bg-white/20 text-white border-white/30">
-              Powered by Gemini AI
+              {t('chat.powered')}
             </Badge>
           </CardTitle>
         </CardHeader>
@@ -206,7 +208,7 @@ const ChatAssistant = () => {
 
           {/* Quick Prompts */}
           <div className="p-4 border-t bg-muted/50">
-            <p className="text-sm text-muted-foreground mb-2">Quick prompts:</p>
+            <p className="text-sm text-muted-foreground mb-2">{t('chat.quick_prompts')}</p>
             <div className="flex gap-2 flex-wrap">
               {quickPrompts.map((prompt, index) => (
                 <Button
@@ -226,7 +228,7 @@ const ChatAssistant = () => {
           <div className="p-4 border-t">
             <div className="flex gap-2">
               <Input
-                placeholder="Share how you're feeling or ask for support..."
+                placeholder={t('chat.placeholder')}
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}

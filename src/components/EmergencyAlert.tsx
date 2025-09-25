@@ -19,6 +19,7 @@ import {
   Edit,
   Trash2
 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface EmergencyContact {
   id: string;
@@ -29,6 +30,7 @@ interface EmergencyContact {
 }
 
 const EmergencyAlert = () => {
+  const { t } = useLanguage();
   const [isEmergencyActive, setIsEmergencyActive] = useState(false);
   const [emergencyContacts, setEmergencyContacts] = useState<EmergencyContact[]>([
     {
@@ -174,7 +176,7 @@ const EmergencyAlert = () => {
             <CardHeader className="bg-gradient-emergency text-destructive-foreground">
               <CardTitle className="flex items-center gap-2">
                 <AlertTriangle className="h-6 w-6" />
-                Need Immediate Help?
+                {t('emergency.title')}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
@@ -191,7 +193,7 @@ const EmergencyAlert = () => {
                   size="lg"
                 >
                   <AlertTriangle className="h-5 w-5 mr-2" />
-                  Send Emergency Alert
+                  {t('emergency.panic')}
                 </Button>
 
                 <div className="grid grid-cols-2 gap-2 pt-2">
