@@ -47,6 +47,12 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        wellness: {
+          calm: "hsl(var(--wellness-calm))",
+          energy: "hsl(var(--wellness-energy))",
+          focus: "hsl(var(--wellness-focus))",
+          joy: "hsl(var(--wellness-joy))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -57,6 +63,19 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+      },
+      backgroundImage: {
+        'gradient-wellness': 'var(--gradient-wellness)',
+        'gradient-mood': 'var(--gradient-mood)', 
+        'gradient-emergency': 'var(--gradient-emergency)',
+      },
+      boxShadow: {
+        'wellness': 'var(--shadow-wellness)',
+        'elevated': 'var(--shadow-elevated)',
+      },
+      transitionTimingFunction: {
+        'smooth': 'var(--transition-smooth)',
+        'bounce': 'var(--transition-bounce)',
       },
       borderRadius: {
         lg: "var(--radius)",
