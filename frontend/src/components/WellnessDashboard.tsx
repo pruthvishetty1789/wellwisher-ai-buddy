@@ -22,9 +22,11 @@ import {
   User,
   Activity,
   Languages,
-  ChevronDown
+  ChevronDown,
+  LogOut
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useNavigate } from "react-router-dom";
 import ChatAssistant from "./ChatAssistant";
 import MoodTracker from "./MoodTracker";
 import WellnessReminders from "./WellnessReminders";
@@ -33,6 +35,13 @@ import EmergencyAlert from "./EmergencyAlert";
 const WellnessDashboard = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const { t, language, setLanguage } = useLanguage();
+  const navigate = useNavigate();
+  
+  // Handle logout
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    navigate('/login');
+  };
   
   // Dark mode state
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -136,34 +145,76 @@ const WellnessDashboard = () => {
       default:
         return (
           <div className="space-y-6">
-            {/* Welcome Section */}
-            <Card className="bg-gradient-wellness text-primary-foreground shadow-wellness">
-              <CardHeader>
+            {/* Professional Header Section */}
+            <Card className="bg-card/50 backdrop-blur-sm border-border/50 shadow-lg">
+              <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-2xl mb-2">Welcome back, Alex!</CardTitle>
-                    <p className="text-primary-foreground/90">How are you feeling today? Let's check in with your mental wellness.</p>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                          <Brain className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <CardTitle className="text-xl font-semibold text-foreground">
+                            Mental Wellness Dashboard
+                          </CardTitle>
+                          <p className="text-sm text-muted-foreground">
+                            {new Date().toLocaleDateString('en-US', { 
+                              weekday: 'long', 
+                              year: 'numeric', 
+                              month: 'long', 
+                              day: 'numeric' 
+                            })}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 mt-3">
+                      <Badge variant="secondary" className="text-xs">
+                        Active Session
+                      </Badge>
+                      <Badge variant={wellnessScore >= 70 ? "default" : "destructive"} className="text-xs">
+                        {wellnessScore >= 70 ? "Good" : "Needs Attention"} Health Status
+                      </Badge>
+                    </div>
                   </div>
-                  <Brain className="h-12 w-12 text-primary-foreground/80" />
+                  <div className="text-right space-y-1">
+                    <div className="text-2xl font-bold text-foreground">{wellnessScore}%</div>
+                    <div className="text-xs text-muted-foreground">Wellness Score</div>
+                    <div className="text-xs text-emerald-600 font-medium">{moodTrend} vs last week</div>
+                  </div>
                 </div>
               </CardHeader>
             </Card>
 
-            {/* Quick Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Analytics Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {quickStats.map((stat, index) => {
                 const IconComponent = stat.icon;
                 return (
-                  <Card key={index} className="hover:shadow-wellness transition-all duration-300">
+                  <Card key={index} className="bg-card/70 backdrop-blur-sm border-border/50 hover:bg-card/90 transition-all duration-300 hover:shadow-lg group">
                     <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
-                          <p className="text-2xl font-bold">{stat.value}</p>
-                          <p className="text-xs text-muted-foreground mt-1">{stat.change}</p>
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className={`p-2.5 rounded-xl ${stat.color} group-hover:scale-110 transition-transform duration-200`}>
+                              <IconComponent className="h-4 w-4 text-white" />
+                            </div>
+                            <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+                              {stat.title}
+                            </p>
+                          </div>
+                          <div className="space-y-1">
+                            <p className="text-3xl font-bold text-foreground">{stat.value}</p>
+                            <p className="text-xs text-muted-foreground font-medium">{stat.change}</p>
+                          </div>
                         </div>
-                        <div className={`p-3 rounded-lg ${stat.color}`}>
-                          <IconComponent className="h-5 w-5 text-white" />
+                      </div>
+                      <div className="mt-4 pt-3 border-t border-border/30">
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-muted-foreground">Last updated</span>
+                          <span className="text-xs text-muted-foreground">2 min ago</span>
                         </div>
                       </div>
                     </CardContent>
@@ -172,79 +223,172 @@ const WellnessDashboard = () => {
               })}
             </div>
 
-            {/* Wellness Progress */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Activity className="h-5 w-5 text-primary" />
-                  Today's Wellness Progress
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Overall Wellness</span>
-                    <span>{wellnessScore}%</span>
+            {/* Wellness Analytics */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <Card className="lg:col-span-2 bg-card/70 backdrop-blur-sm border-border/50">
+                <CardHeader className="pb-4">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2 text-lg font-semibold">
+                      <Activity className="h-5 w-5 text-primary" />
+                      Wellness Metrics
+                    </CardTitle>
+                    <Badge variant="outline" className="text-xs">
+                      Real-time
+                    </Badge>
                   </div>
-                  <Progress value={wellnessScore} className="h-2" />
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4 pt-4">
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>Mindfulness</span>
-                      <span>85%</span>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <span className="text-sm font-medium text-foreground">Overall Wellness</span>
+                        <p className="text-xs text-muted-foreground">Composite health score</p>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-2xl font-bold text-foreground">{wellnessScore}%</span>
+                        <p className="text-xs text-emerald-600 font-medium">↗ {moodTrend}</p>
+                      </div>
                     </div>
-                    <Progress value={85} className="h-2" />
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>Physical Activity</span>
-                      <span>60%</span>
+                    <div className="relative">
+                      <Progress value={wellnessScore} className="h-3 bg-muted" />
+                      <div className="absolute inset-0 bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 rounded-full opacity-20"></div>
                     </div>
-                    <Progress value={60} className="h-2" />
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                  
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium text-foreground">Mindfulness</span>
+                        <span className="text-sm font-bold text-foreground">85%</span>
+                      </div>
+                      <Progress value={85} className="h-2" />
+                    </div>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium text-foreground">Physical Activity</span>
+                        <span className="text-sm font-bold text-foreground">60%</span>
+                      </div>
+                      <Progress value={60} className="h-2" />
+                    </div>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium text-foreground">Sleep Quality</span>
+                        <span className="text-sm font-bold text-foreground">72%</span>
+                      </div>
+                      <Progress value={72} className="h-2" />
+                    </div>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium text-foreground">Stress Level</span>
+                        <span className="text-sm font-bold text-orange-600">32%</span>
+                      </div>
+                      <Progress value={32} className="h-2" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-card/70 backdrop-blur-sm border-border/50">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-lg font-semibold">Today's Summary</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                        <span className="text-sm font-medium">Sessions</span>
+                      </div>
+                      <span className="text-sm font-bold">3</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                        <span className="text-sm font-medium">Streak</span>
+                      </div>
+                      <span className="text-sm font-bold">{streakDays} days</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-purple-500"></div>
+                        <span className="text-sm font-medium">Goals Met</span>
+                      </div>
+                      <span className="text-sm font-bold">2/3</span>
+                    </div>
+                  </div>
+                  
+                  <div className="pt-4 border-t border-border/30">
+                    <h4 className="text-sm font-semibold mb-3">Quick Insights</h4>
+                    <div className="space-y-2 text-xs text-muted-foreground">
+                      <p>• Best mindfulness session today at 2 PM</p>
+                      <p>• Stress levels decreased by 15% since morning</p>
+                      <p>• Recommended: Take a 10-min break</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
 
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
+            {/* Action Center */}
+            <Card className="bg-card/70 backdrop-blur-sm border-border/50">
+              <CardHeader className="pb-4">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg font-semibold">Action Center</CardTitle>
+                  <Badge variant="secondary" className="text-xs">4 Available</Badge>
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <Button 
-                    variant="outline" 
-                    className="h-auto p-4 flex flex-col gap-2"
+                    variant="ghost" 
+                    className="h-24 p-4 flex flex-col gap-3 bg-muted/30 hover:bg-muted/60 border border-border/30 hover:border-border/60 transition-all duration-200 group"
                     onClick={() => setActiveTab("mood")}
                   >
-                    <Heart className="h-5 w-5 text-wellness-calm" />
-                    <span className="text-sm">Log Mood</span>
+                    <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-wellness-calm/20 group-hover:bg-wellness-calm/30 transition-colors">
+                      <Heart className="h-5 w-5 text-wellness-calm" />
+                    </div>
+                    <div className="text-center">
+                      <div className="text-sm font-medium text-foreground">Log Mood</div>
+                      <div className="text-xs text-muted-foreground">Track feelings</div>
+                    </div>
                   </Button>
                   <Button 
-                    variant="outline" 
-                    className="h-auto p-4 flex flex-col gap-2"
+                    variant="ghost" 
+                    className="h-24 p-4 flex flex-col gap-3 bg-muted/30 hover:bg-muted/60 border border-border/30 hover:border-border/60 transition-all duration-200 group"
                     onClick={() => setActiveTab("chat")}
                   >
-                    <MessageCircle className="h-5 w-5 text-primary" />
-                    <span className="text-sm">Chat with AI</span>
+                    <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/20 group-hover:bg-primary/30 transition-colors">
+                      <MessageCircle className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="text-center">
+                      <div className="text-sm font-medium text-foreground">AI Assistant</div>
+                      <div className="text-xs text-muted-foreground">Get support</div>
+                    </div>
                   </Button>
                   <Button 
-                    variant="outline" 
-                    className="h-auto p-4 flex flex-col gap-2"
+                    variant="ghost" 
+                    className="h-24 p-4 flex flex-col gap-3 bg-muted/30 hover:bg-muted/60 border border-border/30 hover:border-border/60 transition-all duration-200 group"
                   >
-                    <Sun className="h-5 w-5 text-wellness-joy" />
-                    <span className="text-sm">Meditation</span>
+                    <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-wellness-joy/20 group-hover:bg-wellness-joy/30 transition-colors">
+                      <Sun className="h-5 w-5 text-wellness-joy" />
+                    </div>
+                    <div className="text-center">
+                      <div className="text-sm font-medium text-foreground">Meditation</div>
+                      <div className="text-xs text-muted-foreground">5 min session</div>
+                    </div>
                   </Button>
                   <Button 
-                    variant="outline" 
-                    className="h-auto p-4 flex flex-col gap-2"
+                    variant="ghost" 
+                    className="h-24 p-4 flex flex-col gap-3 bg-muted/30 hover:bg-muted/60 border border-border/30 hover:border-border/60 transition-all duration-200 group"
                     onClick={() => setActiveTab("emergency")}
                   >
-                    <AlertTriangle className="h-5 w-5 text-destructive" />
-                    <span className="text-sm">Need Help</span>
+                    <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-destructive/20 group-hover:bg-destructive/30 transition-colors">
+                      <AlertTriangle className="h-5 w-5 text-destructive" />
+                    </div>
+                    <div className="text-center">
+                      <div className="text-sm font-medium text-foreground">Emergency</div>
+                      <div className="text-xs text-muted-foreground">Get help now</div>
+                    </div>
                   </Button>
                 </div>
               </CardContent>
@@ -272,8 +416,8 @@ const WellnessDashboard = () => {
             <div className="flex justify-evenly w-full max-w-2xl gap-1">
               {[
                 { id: "dashboard", label: t('dashboard.title'), icon: Activity },
-                { id: "chat", label: t('chat.title'), icon: MessageCircle },
                 { id: "mood", label: t('mood.title'), icon: Heart },
+                { id: "chat", label: t('chat.title'), icon: MessageCircle },
                 { id: "reminders", label: t('reminders.title'), icon: Calendar },
                 { id: "emergency", label: t('emergency.title'), icon: AlertTriangle }
               ].map((tab) => {
@@ -345,14 +489,24 @@ const WellnessDashboard = () => {
               {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
             
-            {/* Login Button */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0 bg-card/60 hover:bg-card/80 border border-border/30 text-foreground rounded-lg backdrop-blur-md"
-            >
-              <User className="h-4 w-4" />
-            </Button>
+            {/* Logout Button */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0 bg-card/60 hover:bg-card/80 border border-border/30 text-foreground rounded-lg backdrop-blur-md"
+                >
+                  <User className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </header>
