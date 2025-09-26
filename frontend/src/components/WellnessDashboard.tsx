@@ -3,6 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { 
   MessageCircle, 
   Brain, 
@@ -11,20 +17,30 @@ import {
   Calendar,
   TrendingUp,
   Zap,
-  Moon,
   Sun,
-  Activity
+  Activity,
+  Languages,
+  ChevronDown
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import ChatAssistant from "./ChatAssistant";
 import MoodTracker from "./MoodTracker";
 import WellnessReminders from "./WellnessReminders";
 import EmergencyAlert from "./EmergencyAlert";
-import LanguageSelector from "./LanguageSelector";
 
 const WellnessDashboard = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
-  const { t } = useLanguage();
+  const { t, language, setLanguage } = useLanguage();
+  
+  // Languages for compact selector
+  const languages = {
+    en: { name: 'English', short: 'EN' },
+    hi: { name: 'हिंदी', short: 'हि' },
+    ta: { name: 'தமிழ்', short: 'த' },
+    te: { name: 'తెలుగు', short: 'తె' },
+    bn: { name: 'বাংলা', short: 'বং' },
+    gu: { name: 'ગુજરાતી', short: 'ગુ' },
+  } as const;
   
   // Sample data for the wellness dashboard
   const wellnessScore = 78;
@@ -56,7 +72,7 @@ const WellnessDashboard = () => {
     { 
       title: "Sleep Quality", 
       value: "Good", 
-      icon: Moon, 
+      icon: Heart, 
       color: "bg-wellness-calm",
       change: "7.5 hrs average"
     }
@@ -243,20 +259,42 @@ const WellnessDashboard = () => {
             </div>
           </nav>
           
-          {/* Spacer for balance */}
-          <div className="w-32"></div>
+          {/* Header Controls - Language, Theme, Login */}
+          <div className="flex items-center gap-2">
+            {/* Compact Language Selector */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-2 bg-card/60 hover:bg-card/80 border border-border/30 text-foreground rounded-lg backdrop-blur-md flex items-center gap-1"
+                >
+                  <Languages className="h-3 w-3" />
+                  <span className="text-xs font-medium">{languages[language as keyof typeof languages]?.short || 'EN'}</span>
+                  <ChevronDown className="h-3 w-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-40" align="end">
+                {Object.entries(languages).map(([code, lang]) => (
+                  <DropdownMenuItem
+                    key={code}
+                    onClick={() => setLanguage(code as any)}
+                    className={`cursor-pointer ${language === code ? 'bg-accent' : ''}`}
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <span className="text-sm">{lang.name}</span>
+                      <span className="text-xs text-muted-foreground">{lang.short}</span>
+                    </div>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </header>
 
       {/* Main Content - Add top padding to account for fixed header */}
       <main className="pt-14 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {activeTab === "dashboard" && (
-          <div className="mb-6 flex justify-end">
-            <div className="w-72">
-              <LanguageSelector />
-            </div>
-          </div>
-        )}
         {renderActiveTab()}
       </main>
     </div>

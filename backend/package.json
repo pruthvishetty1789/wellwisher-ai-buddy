@@ -1,0 +1,36 @@
+{
+  "name": "wellwisher-ai-buddy-backend",
+  "version": "1.0.0",
+  "description": "Backend API for Wellwisher AI Buddy wellness application",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.19.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "express-rate-limit": "^7.4.0",
+    "express-validator": "^7.2.0",
+    "helmet": "^7.1.0",
+    "mongoose": "^8.7.0",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.10"
+  },
+  "keywords": [
+    "wellness",
+    "ai",
+    "mental-health",
+    "chat",
+    "gemini"
+  ],
+  "author": "Minitheja",
+  "license": "MIT"
+}
