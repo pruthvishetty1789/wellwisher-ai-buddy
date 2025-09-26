@@ -195,18 +195,20 @@ const WellnessDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="bg-card border-b border-border sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-2">
-              <Brain className="h-8 w-8 text-primary" />
-              <h1 className="text-xl font-bold bg-gradient-wellness bg-clip-text text-transparent">
-                {t('app.title')}
-              </h1>
-            </div>
-            
-            <nav className="flex gap-1">
+      {/* Header - Fixed with transparent background */}
+      <header className="fixed top-2 left-0 right-0 z-50 bg-transparent backdrop-blur-sm border-b border-border/20">
+        <div className="flex items-center justify-between h-10 px-6">
+          {/* Logo Section - Fixed to Left Corner */}
+          <div className="flex items-center gap-2 bg-card/95 backdrop-blur rounded-lg px-3 py-1.5 shadow-md border border-border/30">
+            <Brain className="h-5 w-5 text-primary" />
+            <h1 className="text-base font-bold text-primary">
+              {t('app.title')}
+            </h1>
+          </div>
+          
+          {/* Navigation - 50% width, evenly spaced */}
+          <nav className="w-1/2 flex justify-center">
+            <div className="flex justify-evenly w-full max-w-2xl gap-1">
               {[
                 { id: "dashboard", label: t('dashboard.title'), icon: Activity },
                 { id: "chat", label: t('chat.title'), icon: MessageCircle },
@@ -216,25 +218,38 @@ const WellnessDashboard = () => {
               ].map((tab) => {
                 const IconComponent = tab.icon;
                 return (
-                  <Button
+                  <button
                     key={tab.id}
-                    variant={activeTab === tab.id ? "default" : "ghost"}
-                    size="sm"
                     onClick={() => setActiveTab(tab.id)}
-                    className="flex items-center gap-2"
+                    className={`
+                      flex flex-col items-center justify-center px-2 py-2 rounded-lg border cursor-pointer 
+                      transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-md
+                      backdrop-blur-md min-w-[60px] h-12
+                      ${activeTab === tab.id 
+                        ? 'bg-primary/20 text-primary border-primary/50 shadow-sm scale-105' 
+                        : 'bg-card/60 text-foreground border-border/60 hover:text-primary hover:bg-card/80 hover:border-primary/30'
+                      }
+                    `}
                   >
-                    <IconComponent className="h-4 w-4" />
-                    <span className="hidden sm:inline">{tab.label}</span>
-                  </Button>
+                    <IconComponent className={`h-4 w-4 mb-0.5 transition-all duration-200 ${
+                      activeTab === tab.id ? 'text-primary' : 'text-foreground hover:text-primary'
+                    }`} />
+                    <span className={`text-[10px] font-semibold leading-tight ${
+                      activeTab === tab.id ? 'text-primary' : 'text-foreground'
+                    }`}>{tab.label}</span>
+                  </button>
                 );
               })}
-            </nav>
-          </div>
+            </div>
+          </nav>
+          
+          {/* Spacer for balance */}
+          <div className="w-32"></div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      {/* Main Content - Add top padding to account for fixed header */}
+      <main className="pt-14 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {activeTab === "dashboard" && (
           <div className="mb-6 flex justify-end">
             <div className="w-72">
