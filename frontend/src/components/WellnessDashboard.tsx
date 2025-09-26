@@ -490,23 +490,38 @@ const WellnessDashboard = () => {
             </Button>
             
             {/* Logout Button */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0 bg-card/60 hover:bg-card/80 border border-border/30 text-foreground rounded-lg backdrop-blur-md"
-                >
-                  <User className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+           <DropdownMenu>
+  <DropdownMenuTrigger asChild>
+    <Button
+      variant="ghost"
+      size="sm"
+      className="h-8 w-8 p-0 bg-card/60 hover:bg-card/80 border border-border/30 text-foreground rounded-lg backdrop-blur-md"
+    >
+      <User className="h-4 w-4" />
+    </Button>
+  </DropdownMenuTrigger>
+
+  <DropdownMenuContent align="end">
+    {/* Profile route */}
+    <DropdownMenuItem
+      onClick={() => navigate(`/profile/${localStorage.getItem("userId")}`)}
+      className="cursor-pointer flex items-center gap-2"
+    >
+      <User className="h-4 w-4" />
+      Profile
+    </DropdownMenuItem>
+
+    {/* Logout */}
+    <DropdownMenuItem
+      onClick={handleLogout}
+      className="cursor-pointer flex items-center gap-2"
+    >
+      <LogOut className="h-4 w-4" />
+      Logout
+    </DropdownMenuItem>
+  </DropdownMenuContent>
+</DropdownMenu>
+
           </div>
         </div>
       </header>
