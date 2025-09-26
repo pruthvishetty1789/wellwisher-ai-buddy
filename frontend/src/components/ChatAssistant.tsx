@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Bot, User, Heart, Lightbulb, Smile } from "lucide-react";
+import { Send, Bot, User, Heart, Lightbulb, Smile, Save } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Message {
@@ -13,6 +13,15 @@ interface Message {
   isUser: boolean;
   timestamp: Date;
   mood?: "supportive" | "encouraging" | "calming";
+}
+
+interface SessionSummary {
+  sessionId: string;
+  overallMood: string;
+  moodScore: number;
+  stressTriggers: string[];
+  suggestions: string[];
+  aiGeneratedSummary: string;
 }
 
 const ChatAssistant = () => {
@@ -29,6 +38,14 @@ const ChatAssistant = () => {
   
   const [inputMessage, setInputMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [isUsingAI, setIsUsingAI] = useState(true);
+  const [sessionStartTime, setSessionStartTime] = useState(Date.now());
+  const [currentSession, setCurrentSession] = useState<SessionSummary | null>(null);
+  const [isSavingSession, setIsSavingSession] = useState(false);
+
+  // Backend API configuration
+  const API_BASE_URL = 'http://localhost:3002';
+  const USER_ID = 'user-' + Math.random().toString(36).substr(2, 9); // Generate random user ID
 
   const supportiveResponses = [
     {
