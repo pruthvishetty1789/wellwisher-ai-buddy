@@ -192,8 +192,16 @@ router.post('/login', authLimiter, validateLogin, async (req, res) => {
 // GET /api/auth/verify - Verify if token is valid
 router.get('/verify', authenticateToken, async (req, res) => {
   try {
+    console.log('🔍 Token verification requested');
+    console.log('👤 Authenticated user:', {
+      id: req.user._id,
+      name: req.user.name,
+      email: req.user.email,
+      lastLogin: req.user.lastLogin
+    });
+    
     // If we reach here, the token is valid (middleware passed)
-    res.json({
+    const userData = {
       success: true,
       message: 'Token is valid',
       user: {
@@ -201,9 +209,12 @@ router.get('/verify', authenticateToken, async (req, res) => {
         name: req.user.name,
         email: req.user.email
       }
-    });
+    };
+    
+    console.log('✅ Token verification successful, sending user data:', userData);
+    res.json(userData);
   } catch (error) {
-    console.error('Token verification error:', error);
+    console.error('❌ Token verification error:', error);
     res.status(401).json({
       success: false,
       message: 'Invalid token'
@@ -214,7 +225,15 @@ router.get('/verify', authenticateToken, async (req, res) => {
 // GET /api/auth/me
 router.get('/me', authenticateToken, async (req, res) => {
   try {
-    res.json({
+    console.log('👤 /me endpoint: Getting current user info');
+    console.log('🔍 Session user:', {
+      id: req.user._id,
+      name: req.user.name,
+      email: req.user.email,
+      lastLogin: req.user.lastLogin
+    });
+    
+    const userData = {
       success: true,
       user: {
         id: req.user._id,
@@ -225,9 +244,12 @@ router.get('/me', authenticateToken, async (req, res) => {
         lastLogin: req.user.lastLogin,
         createdAt: req.user.createdAt
       }
-    });
+    };
+    
+    console.log('📤 /me endpoint: Sending user data:', userData);
+    res.json(userData);
   } catch (error) {
-    console.error('Get user error:', error);
+    console.error('❌ Get user error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to get user information'

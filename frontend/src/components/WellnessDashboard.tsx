@@ -527,8 +527,14 @@ const WellnessDashboard = () => {
       </header>
 
       {/* Main Content - Add top padding to account for fixed header */}
-      <main className="pt-14 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {renderActiveTab()}
+      <main className={`pt-14 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${activeTab === 'chat' ? 'h-screen flex flex-col' : 'py-6'}`}>
+        {activeTab === 'chat' ? (
+          <div className="flex-1 flex flex-col pb-6">
+            {renderActiveTab()}
+          </div>
+        ) : (
+          renderActiveTab()
+        )}
       </main>
     </div>
   );

@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { Calendar } from "@/components/ui/calendar";
+
 import { 
   Smile, 
   Meh, 
@@ -12,12 +13,13 @@ import {
   Heart,
   Brain,
   Activity,
-  Zap,
   Cloud,
   Sun,
   CloudRain,
   TrendingUp,
-  BarChart3
+  BarChart3,
+  Flame,
+  Calendar as CalendarIcon
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -32,6 +34,20 @@ interface MoodEntry {
   factors: string[];
 }
 
+interface SessionData {
+  sessionId: string;
+  date: Date;
+  overallMood: string;
+  moodScore: number;
+  stressTriggers: string[];
+  suggestions: string[];
+  aiGeneratedSummary: string;
+  messageCount: number;
+  sessionDuration: number;
+}
+
+
+
 const MoodTracker = () => {
   const { t } = useLanguage();
   const [selectedMood, setSelectedMood] = useState<string>("");
@@ -41,6 +57,159 @@ const MoodTracker = () => {
   const [notes, setNotes] = useState("");
   const [selectedFactors, setSelectedFactors] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  
+  // State for streak data only
+  const [sessionDays, setSessionDays] = useState<Set<string>>(new Set());
+  const [currentStreak, setCurrentStreak] = useState<number>(0);
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState<Date>(new Date());
+  const [isLoadingStreak, setIsLoadingStreak] = useState(false);
+
+  // API configuration
+  const API_BASE_URL = 'http://localhost:3002';
+  const USER_ID = (() => {
+    let storedUserId = localStorage.getItem('userId');
+    if (!storedUserId) {
+      storedUserId = 'user-' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('userId', storedUserId);
+      console.log('🆔 Created new USER_ID:', storedUserId);
+    } else {
+      console.log('🆔 Using existing USER_ID:', storedUserId);
+    }
+    return storedUserId;
+  })();
+
+  // Fetch session data and calculate streak
+  const fetchSessionsAndCalculateStreak = async () => {
+    setIsLoadingStreak(true);
+    try {
+      console.log('🔍 Fetching sessions for USER_ID:', USER_ID);
+      console.log('🌐 API URL:', `${API_BASE_URL}/api/session/user/${USER_ID}`);
+      
+      const response = await fetch(`${API_BASE_URL}/api/session/user/${USER_ID}`);
+      console.log('📡 Response status:', response.status, response.statusText);
+      
+      if (response.ok) {
+        const sessions = await response.json();
+        console.log('📊 Received sessions for streak calculation:', sessions);
+        console.log('📊 Total sessions found:', sessions.length);
+        
+        // Extract unique dates when sessions occurred
+        const sessionDateStrings = new Set<string>();
+        const today = new Date().toDateString();
+        
+        sessions.forEach((session: any, index: number) => {
+          console.log(`🔍 Processing session ${index + 1}:`, session);
+          
+          // Try different date field names that might exist
+          const possibleDates = [session.date, session.createdAt, session.timestamp];
+          let sessionDate = null;
+          
+          for (const dateField of possibleDates) {
+            if (dateField) {
+              sessionDate = new Date(dateField);
+              console.log(`📅 Found date field: ${dateField} -> ${sessionDate}`);
+              break;
+            }
+          }
+          
+          if (sessionDate && !isNaN(sessionDate.getTime())) {
+            const dateString = sessionDate.toDateString();
+            sessionDateStrings.add(dateString);
+            console.log(`✅ Added session date: ${dateString}`);
+          } else {
+            console.log('❌ Could not parse date from session:', session);
+          }
+        });
+        
+        setSessionDays(sessionDateStrings);
+        
+        // Calculate current streak
+        const streak = calculateCurrentStreak(sessionDateStrings);
+        setCurrentStreak(streak);
+        
+        console.log('🔥 Session days found:', Array.from(sessionDateStrings));
+        console.log('� Today is:', today);
+        console.log('✅ Has session today:', sessionDateStrings.has(today));
+        console.log('�📈 Current streak calculated:', streak);
+        
+        // Store user ID for consistency
+        if (!localStorage.getItem('userId')) {
+          localStorage.setItem('userId', USER_ID);
+        }
+      } else {
+        console.error('❌ Failed to fetch session data:', response.status, response.statusText);
+      }
+    } catch (error) {
+      console.error('❌ Error fetching session data:', error);
+    } finally {
+      setIsLoadingStreak(false);
+    }
+  };
+
+  // Calculate current streak from session days
+  const calculateCurrentStreak = (sessionDays: Set<string>): number => {
+    const today = new Date();
+    let streak = 0;
+    
+    // Start from today and go backwards
+    for (let i = 0; i < 365; i++) { // Max 365 days lookback
+      const checkDate = new Date(today.getTime() - i * 24 * 60 * 60 * 1000);
+      const dateString = checkDate.toDateString();
+      
+      if (sessionDays.has(dateString)) {
+        streak++;
+      } else {
+        // If today has no session, continue checking yesterday
+        // If any other day has no session, break the streak
+        if (i > 0) break;
+      }
+    }
+    
+    return streak;
+  };
+
+  // Check if a specific date has a session
+  const hasSessionOnDate = (date: Date): boolean => {
+    return sessionDays.has(date.toDateString());
+  };
+
+  // Generate calendar days for the current month
+  const generateCalendarDays = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth();
+    
+    // First day of the month
+    const firstDay = new Date(year, month, 1);
+    // Last day of the month
+    const lastDay = new Date(year, month + 1, 0);
+    
+    // Start from the first Sunday before the first day
+    const startDate = new Date(firstDay);
+    startDate.setDate(startDate.getDate() - firstDay.getDay());
+    
+    const days = [];
+    const currentDate = new Date(startDate);
+    
+    // Generate 6 weeks (42 days) to fill the calendar
+    for (let i = 0; i < 42; i++) {
+      days.push({
+        date: new Date(currentDate),
+        isCurrentMonth: currentDate.getMonth() === month,
+        isToday: currentDate.toDateString() === today.toDateString()
+      });
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    return days;
+  };
+
+  // Load session data on component mount
+  useEffect(() => {
+    fetchSessionsAndCalculateStreak();
+  }, []);
+
+
 
   const moods = [
     { id: "excellent", label: t('mood.excellent'), icon: Sun, color: "bg-wellness-joy", emoji: "😊" },
@@ -97,9 +266,11 @@ const MoodTracker = () => {
     setSelectedFactors([]);
   };
 
+
+
   return (
     <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Mood Entry Form */}
+      {/* Mood Entry Form - Now takes 2 columns */}
       <div className="lg:col-span-2 space-y-6">
         {/* Daily Mood Selection */}
         <Card>
@@ -243,24 +414,89 @@ const MoodTracker = () => {
         </Button>
       </div>
 
-      {/* Sidebar */}
+      {/* Calendar with Streak - Column 1 */}
       <div className="space-y-6">
-        {/* Calendar */}
         <Card>
           <CardHeader>
-            <CardTitle>Date Selection</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <CalendarIcon className="h-5 w-5 text-primary" />
+              Wellness Calendar
+              <Flame className="h-4 w-4 text-orange-500" />
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <Calendar
-              mode="single"
-              selected={selectedDate}
-              onSelect={(date) => date && setSelectedDate(date)}
-              className="rounded-md border"
-            />
+            {/* Custom calendar with fire icons */}
+            <div className="border rounded-md p-4">
+              {/* Calendar header */}
+              <div className="text-center mb-4">
+                <h3 className="font-semibold">{new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</h3>
+              </div>
+              
+              {/* Days of week */}
+              <div className="grid grid-cols-7 gap-1 mb-2 text-xs text-center font-medium text-muted-foreground">
+                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                  <div key={day} className="py-2">{day}</div>
+                ))}
+              </div>
+              
+              {/* Calendar days */}
+              <div className="grid grid-cols-7 gap-1">
+                {generateCalendarDays().map((day, index) => (
+                  <div
+                    key={index}
+                    className={`
+                      relative h-10 flex items-center justify-center text-sm cursor-pointer rounded hover:bg-gray-100
+                      ${day.isCurrentMonth ? 'text-foreground' : 'text-muted-foreground'}
+                      ${day.isToday ? 'bg-primary text-primary-foreground font-semibold' : ''}
+                    `}
+                    onClick={() => setSelectedCalendarDate(day.date)}
+                  >
+                    {hasSessionOnDate(day.date) ? (
+                      <Flame className="h-5 w-5 text-orange-500 drop-shadow-sm" />
+                    ) : (
+                      <span>{day.date.getDate()}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            {/* Simple streak counter */}
+            <div className="mt-4 text-center space-y-2">
+              <div className="flex items-center justify-center gap-2">
+                <Flame className="h-4 w-4 text-orange-500" />
+                <span className="text-sm font-medium">
+                  {currentStreak} day streak
+                </span>
+              </div>
+              
+            
+              
+              {/* Test buttons */}
+              <div className="space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    // Add today as a test session
+                    const today = new Date().toDateString();
+                    const newSessionDays = new Set(sessionDays);
+                    newSessionDays.add(today);
+                    setSessionDays(newSessionDays);
+                    setCurrentStreak(calculateCurrentStreak(newSessionDays));
+                    console.log('Added test session for today');
+                  }}
+                  className="text-xs"
+                >
+                  Test Today
+                </Button>
+               
+              </div>
+            </div>
           </CardContent>
         </Card>
 
-        {/* Weekly Trends */}
+        {/* Weekly Trends - Keep existing */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -303,29 +539,9 @@ const MoodTracker = () => {
             </div>
           </CardContent>
         </Card>
-
-        {/* Insights */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5 text-primary" />
-              Insights
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="p-3 bg-wellness-energy/10 rounded-lg">
-                <p className="text-sm font-medium text-wellness-energy">💡 Pattern Found</p>
-                <p className="text-xs text-muted-foreground mt-1">Your mood tends to be higher on weekends when you exercise.</p>
-              </div>
-              <div className="p-3 bg-wellness-calm/10 rounded-lg">
-                <p className="text-sm font-medium text-wellness-calm">🎯 Suggestion</p>
-                <p className="text-xs text-muted-foreground mt-1">Try morning meditation to improve your energy levels.</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
+
+
     </div>
   );
 };

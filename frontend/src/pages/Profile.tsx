@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
-import API from "../api"; // axios instance
+import API from "../api.ts"; // axios instance
 
 interface User {
   _id: string;
