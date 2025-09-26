@@ -18,6 +18,8 @@ import {
   TrendingUp,
   Zap,
   Sun,
+  Moon,
+  User,
   Activity,
   Languages,
   ChevronDown
@@ -31,6 +33,49 @@ import EmergencyAlert from "./EmergencyAlert";
 const WellnessDashboard = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const { t, language, setLanguage } = useLanguage();
+  
+  // Dark mode state
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('theme');
+      const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const isDark = savedTheme === 'dark' || (!savedTheme && systemDark);
+      
+      // Apply gradient on initial load
+      setTimeout(() => {
+        if (isDark) {
+          document.documentElement.classList.add('dark');
+          document.body.style.background = 'radial-gradient(ellipse at center, #2d1b3d 0%, #3d1a5b 25%, #4c1d95 50%, #5b21b6 75%, #1a1625 100%), radial-gradient(ellipse at center, #5b21b6 0%, #6b21a8 25%, #7c2d92 50%, #8b5a8c 75%, #2a1f3d 100%)';
+          document.body.style.backgroundBlendMode = 'multiply';
+        } else {
+          document.documentElement.classList.remove('dark');
+             document.body.style.background = 'radial-gradient(ellipse at center, #ddd6fe 0%, #c4b5fd 25%, #a78bfa 50%, #8b5cf6 75%, #7c3aed 100%), radial-gradient(ellipse at center, #dbeafe 0%, #bfdbfe 25%, #93c5fd 50%, #60a5fa 75%, #3b82f6 100%)';
+
+          document.body.style.backgroundBlendMode = 'screen';
+        }
+      }, 0);
+      
+      return isDark;
+    }
+    return false;
+  });
+
+  // Toggle dark mode
+  const toggleDarkMode = () => {
+    const newDarkMode = !isDarkMode;
+    setIsDarkMode(newDarkMode);
+    if (newDarkMode) {
+      document.documentElement.classList.add('dark');
+      document.body.style.background = 'radial-gradient(ellipse at center, #2d1b3d 0%, #3d1a5b 25%, #4c1d95 50%, #5b21b6 75%, #1a1625 100%), radial-gradient(ellipse at center, #5b21b6 0%, #6b21a8 25%, #7c2d92 50%, #8b5a8c 75%, #2a1f3d 100%)';
+      document.body.style.backgroundBlendMode = 'multiply';
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.body.style.background = 'radial-gradient(ellipse at center, #ddd6fe 0%, #c4b5fd 25%, #a78bfa 50%, #8b5cf6 75%, #7c3aed 100%), radial-gradient(ellipse at center, #dbeafe 0%, #bfdbfe 25%, #93c5fd 50%, #60a5fa 75%, #3b82f6 100%)';
+      document.body.style.backgroundBlendMode = 'screen';
+      localStorage.setItem('theme', 'light');
+    }
+  };
   
   // Languages for compact selector
   const languages = {
@@ -210,7 +255,7 @@ const WellnessDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       {/* Header - Fixed with transparent background */}
       <header className="fixed top-2 left-0 right-0 z-50 bg-transparent backdrop-blur-sm border-b border-border/20">
         <div className="flex items-center justify-between h-10 px-6">
@@ -289,6 +334,25 @@ const WellnessDashboard = () => {
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
+            
+            {/* Dark/Light Mode Toggle */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleDarkMode}
+              className="h-8 w-8 p-0 bg-card/60 hover:bg-card/80 border border-border/30 text-foreground rounded-lg backdrop-blur-md"
+            >
+              {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </Button>
+            
+            {/* Login Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 bg-card/60 hover:bg-card/80 border border-border/30 text-foreground rounded-lg backdrop-blur-md"
+            >
+              <User className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       </header>
