@@ -31,6 +31,18 @@ AI Integration: Google Gemini API for NLP, sentiment-aware responses
 Communication Layer: Twilio / Firebase Cloud Messaging for reminders & alerts
 Security: End-to-end encryption + anonymized mood data
 
+🔄 Project Flow
+
+User logs in → Secure authentication (Firebase/Auth).
+
+AI Chat Support → Gemini API provides empathetic, context-aware responses.
+
+Mood Check-ins → Students log daily mood states.
+
+Dashboard Visualization → Trends and insights displayed in an interactive UI.
+
+Reminders & Alerts → Push notifications for wellness tasks; panic alert system triggers SOS.
+
 # Wellwisher AI Buddy - Backend API
 
 This is the backend API for the Wellwisher AI Buddy wellness application. It provides endpoints for saving and analyzing chat sessions using Google's Gemini AI.
@@ -267,21 +279,6 @@ The server logs important events:
 4. Update documentation for new endpoints
 5. Test with various conversation types
 
-## License
-
-MIT License - See LICENSE file for details
-
-🔄 Project Flow
-
-User logs in → Secure authentication (Firebase/Auth).
-
-AI Chat Support → Gemini API provides empathetic, context-aware responses.
-
-Mood Check-ins → Students log daily mood states.
-
-Dashboard Visualization → Trends and insights displayed in an interactive UI.
-
-Reminders & Alerts → Push notifications for wellness tasks; panic alert system triggers SOS.
 
 ✅ Feasibility & Viability
 
@@ -322,3 +319,6 @@ Gamification of wellness – badges, streaks, and community-based motivation.
 👨‍💻 Team – Neural Ninjas
 
 We are passionate innovators committed to leveraging AI for social good, ensuring students receive the mental health support they truly deserve.
+## License
+
+MIT License - See LICENSE file for details
